@@ -1,14 +1,29 @@
 // available commands:
+// "gradle grade": run GatorGrader to assess completion of learning objectives
 // "gradle check": run checkstyle to assess code quality
 // "gradle clean": clean the project of all derived files
 // "gradle build": create the bytecode from the source code
+// "gradle test": run the program's test suite in JUnit
 // "gradle run": run the program and produce output
 
-// comment out gatorgradle if you want to use dev version
-plugins {
-    id "java"
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+    mavenLocal()
+    dependencies {
+      // other option, only needed for specifying a specific version of the Gradle plugin:
+      // classpath "gradle.plugin.org.gatored:gatorgradle:0.4.4"
+      classpath "gradle.plugin.org.gatored:gatorgradle:+"
+    }
+  }
 }
 
+// apply the version of the gradle plugin
+
+apply plugin: 'java'
+apply plugin: 'org.gatored.gatorgradle'
 // declare the repositories that are used to meet dependencies
 repositories {
   mavenLocal()
@@ -16,31 +31,50 @@ repositories {
   mavenCentral()
 }
 
+// specify the use of JUnit for testing
+
+dependencies {
+  testCompile 'junit:junit:4.9'
+}
+
+// always produce diagnostic output when running the test suite
+
+test {
+  testLogging {
+    events "passed", "skipped", "failed", "standardOut", "standardError"
+  }
+}
+
 // specify the use of the gradle version
+
 wrapper {
   gradleVersion = '4.9'
 }
 
 // declare values to place in the manifest file in the JAR
+
 jar {
   manifest {
     attributes(
         'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-        'Main-Class': 'project.Main'
+        'Main-Class': 'project.CipherProgram'
         )
   }
 }
 
 // give the name of the application to run with "gradle run" command
+
 apply plugin: 'application'
-mainClassName = 'project.Main'
+mainClassName = 'project.CipherProgram'
 
 // specify that the application will accept input from System.in
+
 run {
    standardInput = System.in
 }
 
 // perform checkstyle checking with the "gradle check" command
+
 apply plugin: 'checkstyle'
 checkstyle.toolVersion = '8.1'
 checkstyle {
